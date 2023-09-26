@@ -12,6 +12,9 @@ import (
 
 const redisEventKey = "redis_event_key"
 
+// ErrInternal any rate limiting error.
+var ErrInternal = errors.New("internal")
+
 // RedisRLClient rate limited client Redis ratelimit based.
 type RedisRLClient struct {
 	s       service.Service
@@ -66,7 +69,7 @@ func (c *RedisRLClient) Process(
 	)
 
 	if err != nil {
-		return 0, 0, errors.Wrap(err, "redis ratelimit")
+		return 0, 0, errors.Wrapf(ErrInternal, "redis ratelimit: %s", err)
 	}
 
 	if redisRateResult.Allowed == 0 {
