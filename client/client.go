@@ -69,6 +69,15 @@ func (c *RedisRLClient) Process(
 		return 0, 0, errors.Wrap(err, "redis ratelimit")
 	}
 
+	if redisRateResult.Allowed == 0 {
+		return 0, redisRateResult.RetryAfter, nil
+	}
+
+	// add piece of paranoia
+	if redisRateResult.Allowed > len(items) {
+		redisRateResult.Allowed = len(items)
+	}
+
 	// process allowed number of items
 	err = c.s.Process(ctx, items[:redisRateResult.Allowed])
 	if err != nil {
