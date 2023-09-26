@@ -4,13 +4,23 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-redis/redis_rate/v10"
 	"github.com/mrksmt/tt8/service"
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 )
 
-const redisEventKey = "redis_event_key"
+type limiter interface {
+	AllowAtMost(
+		ctx context.Context,
+		rate int,
+		period time.Duration,
+		n int,
+	) (
+		allowed int,
+		retryAfter time.Duration,
+		err error,
+	)
+}
 
 // ErrInternal any rate limiting error.
 var ErrInternal = errors.New("internal")
@@ -18,7 +28,7 @@ var ErrInternal = errors.New("internal")
 // RedisRLClient rate limited client Redis ratelimit based.
 type RedisRLClient struct {
 	s       service.Service
-	limiter *redis_rate.Limiter
+	limiter limiter
 }
 
 var _ LimitedClient = (*RedisRLClient)(nil)
@@ -28,11 +38,10 @@ func NewRedisRLClient(
 	rc *redis.Client,
 	s service.Service,
 ) *RedisRLClient {
-	limiter := redis_rate.NewLimiter(rc)
 
 	c := &RedisRLClient{
 		s:       s,
-		limiter: limiter,
+		limiter: NewRedisRateLimiter(rc),
 	}
 	return c
 }
@@ -57,35 +66,25 @@ func (c *RedisRLClient) Process(
 	n, p := c.s.GetLimits()
 
 	// get rate limiting data from redis
-	redisRateResult, err := c.limiter.AllowAtMost(
-		ctx,
-		redisEventKey,
-		redis_rate.Limit{
-			Rate:   int(n),
-			Burst:  int(n),
-			Period: p,
-		},
-		len(items),
-	)
-
+	allowed, retryAfter, err := c.limiter.AllowAtMost(ctx, int(n), p, len(items))
 	if err != nil {
-		return 0, 0, errors.Wrapf(ErrInternal, "redis ratelimit: %s", err)
+		return 0, 0, errors.Wrap(err, "rate limit processing")
 	}
 
-	if redisRateResult.Allowed == 0 {
-		return 0, redisRateResult.RetryAfter, nil
+	if allowed == 0 {
+		return 0, retryAfter, nil
 	}
 
 	// add piece of paranoia
-	if redisRateResult.Allowed > len(items) {
-		redisRateResult.Allowed = len(items)
+	if allowed > len(items) {
+		allowed = len(items)
 	}
 
 	// process allowed number of items
-	err = c.s.Process(ctx, items[:redisRateResult.Allowed])
+	err = c.s.Process(ctx, items[:allowed])
 	if err != nil {
-		return 0, 0, errors.Wrap(err, "process items")
+		return 0, 0, errors.Wrap(err, "items processing")
 	}
 
-	return redisRateResult.Allowed, redisRateResult.RetryAfter, nil
+	return allowed, retryAfter, nil
 }
