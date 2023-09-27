@@ -12,8 +12,6 @@ type MockedRedisLimiter struct{ mock.Mock }
 
 func (s *MockedRedisLimiter) AllowAtMost(
 	ctx context.Context,
-	rate int,
-	period time.Duration,
 	n int,
 ) (
 	allowed int,

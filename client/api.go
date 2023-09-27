@@ -7,8 +7,10 @@ import (
 	"github.com/mrksmt/tt8/service"
 )
 
-// LimitedClient ic common client interface.
+// LimitedClient defines common interface for all kinds of rate limited clients.
 // All clients should be implements it.
+// processed - number of success processed items.
+// retryAfter - until the next request will be permitted.
 type LimitedClient interface {
 	Process(
 		ctx context.Context,
@@ -19,3 +21,10 @@ type LimitedClient interface {
 		err error,
 	)
 }
+
+type LimiterKind string
+
+const (
+	LimiterKindRedis       LimiterKind = "REDIS"
+	LimiterKindTokenBucket LimiterKind = "TOKEN_BUCKET"
+)
