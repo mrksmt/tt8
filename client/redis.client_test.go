@@ -49,8 +49,9 @@ func Test_redisLimiter(t *testing.T) {
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		t.Skip(err)
 	}
-
-	rdb.FlushDB(ctx).Err()
+	if err := rdb.FlushDB(ctx).Err(); err != nil {
+		t.Skip(err)
+	}
 
 	limiter := NewRedisRateLimiter(rdb, 8, time.Second)
 

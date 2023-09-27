@@ -21,10 +21,3 @@ type LimitedClient interface {
 		err error,
 	)
 }
-
-type LimiterKind string
-
-const (
-	LimiterKindRedis       LimiterKind = "REDIS"
-	LimiterKindTokenBucket LimiterKind = "TOKEN_BUCKET"
-)
