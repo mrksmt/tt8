@@ -53,7 +53,7 @@ func Test_redisLimiter(t *testing.T) {
 		t.Skip(err)
 	}
 
-	limiter := NewRedisRateLimiter(rdb, 8, time.Second)
+	limiter := newRedisRateLimiter(rdb, 8, time.Second)
 
 	tests := []struct {
 		name  string

@@ -23,7 +23,7 @@ func NewRedisRLClient(
 
 	c := &Client{
 		srv:     s,
-		limiter: NewRedisRateLimiter(rc, n, p),
+		limiter: newRedisRateLimiter(rc, n, p),
 	}
 
 	return c
@@ -37,7 +37,7 @@ type RedisRateLimiter struct {
 
 var _ limiter = (*RedisRateLimiter)(nil)
 
-func NewRedisRateLimiter(
+func newRedisRateLimiter(
 	rdb *redis.Client,
 	rate uint64,
 	period time.Duration,
