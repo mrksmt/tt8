@@ -14,16 +14,18 @@ import (
 const redisEventKey = "redis_event_key"
 
 // NewRedisRLClient returns new rate limited client with RedisDB limiter.
+// Implements GCRA (aka leaky bucket).
 func NewRedisRLClient(
-	rc *redis.Client,
-	s service.Service,
+	rdb *redis.Client,
+	srv service.Service,
 ) *Client {
 
-	n, p := s.GetLimits()
+	rate, period := srv.GetLimits()
+	limiter := newRedisRateLimiter(rdb, rate, period)
 
 	c := &Client{
-		srv:     s,
-		limiter: newRedisRateLimiter(rc, n, p),
+		srv:     srv,
+		limiter: limiter,
 	}
 
 	return c
@@ -42,8 +44,9 @@ func newRedisRateLimiter(
 	rate uint64,
 	period time.Duration,
 ) *RedisRateLimiter {
+	limiter := redis_rate.NewLimiter(rdb)
 	rrl := &RedisRateLimiter{
-		limiter: redis_rate.NewLimiter(rdb),
+		limiter: limiter,
 		rate:    rate,
 		period:  period,
 	}
