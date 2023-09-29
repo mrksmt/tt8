@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"testing"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -14,14 +13,6 @@ import (
 	"github.com/mrksmt/tt8/service"
 )
 
-func TestRedis(t *testing.T) {
-	Example_RedisClient()
-}
-
-func TestBucket(t *testing.T) {
-	Example_BucketClient()
-}
-
 func getMockedService() service.Service {
 	mockedService := &mocks.MockedService{}
 	mockedService.On("GetLimits").Return(uint64(8), time.Second)
@@ -29,7 +20,7 @@ func getMockedService() service.Service {
 	return mockedService
 }
 
-func Example_RedisClient() {
+func ExampleRedisClient() {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Millisecond*2000)
 	defer cancel()
@@ -77,9 +68,11 @@ func Example_RedisClient() {
 		case <-ticker.C:
 		}
 	}
+
+	// Output:
 }
 
-func Example_BucketClient() {
+func ExampleBucketClient() {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Millisecond*2000)
 	defer cancel()
@@ -113,4 +106,6 @@ func Example_BucketClient() {
 		case <-ticker.C:
 		}
 	}
+
+	// Output:
 }
