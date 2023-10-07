@@ -5,3 +5,7 @@ run-examples:
 .PHONY: run-tests
 run-tests:
 	@go test -tags all -v  ./...
+
+.PHONY: run-lint
+run-lint:
+	@golangci-lint run

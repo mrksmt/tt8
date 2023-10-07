@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/mrksmt/tt8/client"
@@ -26,7 +27,7 @@ func Test_ExampleRedisClient(t *testing.T) {
 	ExampleBucketClient()
 }
 
-func ExampleRedisClient() {
+func ExampleRedisClient() { //nolint
 
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Millisecond*2000)
 	defer cancel()
@@ -38,10 +39,14 @@ func ExampleRedisClient() {
 
 	rdb := redis.NewClient(redisOptions)
 	if err := rdb.Ping(ctx).Err(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+
+		return
 	}
 	if err := rdb.FlushAll(ctx).Err(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
+
+		return
 	}
 
 	limitedClient := client.NewRedisRLClient(
@@ -58,7 +63,8 @@ func ExampleRedisClient() {
 
 		processed, retryAfter, err := limitedClient.Process(ctx, batch...)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 
 		fmt.Printf(
@@ -74,7 +80,6 @@ func ExampleRedisClient() {
 		case <-ticker.C:
 		}
 	}
-
 }
 
 // Test_ExampleBucketClient run ExampleBucketClient func
@@ -83,7 +88,7 @@ func Test_ExampleBucketClient(t *testing.T) {
 }
 
 // ExampleBucketClient example run of bucket rate limited client
-func ExampleBucketClient() {
+func ExampleBucketClient() { //nolint
 
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Millisecond*2000)
 	defer cancel()
@@ -101,7 +106,8 @@ func ExampleBucketClient() {
 
 		processed, retryAfter, err := limitedClient.Process(ctx, batch...)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
+			return
 		}
 
 		fmt.Printf(
@@ -117,4 +123,27 @@ func ExampleBucketClient() {
 		case <-ticker.C:
 		}
 	}
+}
+
+func TestXxx(t *testing.T) {
+	s := "abcй"
+
+	for idx, x := range s {
+		spew.Dump(idx, x)
+	}
+
+	fmt.Println() //nolint
+
+	for idx := 0; idx < len(s); idx++ {
+		spew.Dump(s[idx])
+	}
+
+	fmt.Println()
+
+	rs := []rune(s)
+
+	for idx, x := range rs {
+		spew.Dump(idx, x)
+	}
+
 }

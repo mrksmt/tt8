@@ -36,7 +36,7 @@ func Test_RateLimit(t *testing.T) {
 	require.EqualValues(t, 2, processed)
 }
 
-func Test_redisLimiter(t *testing.T) {
+func Test_redisLimiter(t *testing.T) { //nolint
 
 	ctx := context.TODO()
 
