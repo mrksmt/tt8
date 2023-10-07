@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"testing"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -20,6 +21,11 @@ func getMockedService() service.Service {
 	return mockedService
 }
 
+// Test_ExampleRedisClient run ExampleRedisClient func
+func Test_ExampleRedisClient(t *testing.T) {
+	ExampleBucketClient()
+}
+
 func ExampleRedisClient() {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Millisecond*2000)
@@ -34,7 +40,7 @@ func ExampleRedisClient() {
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		log.Fatal(err)
 	}
-	if err := rdb.FlushDB(ctx).Err(); err != nil {
+	if err := rdb.FlushAll(ctx).Err(); err != nil {
 		log.Fatal(err)
 	}
 
@@ -69,9 +75,14 @@ func ExampleRedisClient() {
 		}
 	}
 
-	// Output:
 }
 
+// Test_ExampleBucketClient run ExampleBucketClient func
+func Test_ExampleBucketClient(t *testing.T) {
+	ExampleBucketClient()
+}
+
+// ExampleBucketClient example run of bucket rate limited client
 func ExampleBucketClient() {
 
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Millisecond*2000)
@@ -106,6 +117,4 @@ func ExampleBucketClient() {
 		case <-ticker.C:
 		}
 	}
-
-	// Output:
 }

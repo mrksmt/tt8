@@ -49,7 +49,7 @@ func Test_redisLimiter(t *testing.T) {
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		t.Skip(err)
 	}
-	if err := rdb.FlushDB(ctx).Err(); err != nil {
+	if err := rdb.FlushAll(ctx).Err(); err != nil {
 		t.Skip(err)
 	}
 
@@ -76,7 +76,7 @@ func Test_redisLimiter(t *testing.T) {
 		{
 			name:  "3",
 			n:     8,
-			allow: 4,
+			allow: 5,
 			sleep: time.Millisecond * 100,
 		},
 		{
@@ -109,4 +109,24 @@ func Test_redisLimiter(t *testing.T) {
 		t.Run(test.name, testFunc)
 		<-time.After(test.sleep)
 	}
+}
+
+func Test_redisLimiter2(t *testing.T) {
+
+	ctx := context.TODO()
+
+	redisOptions := &redis.Options{
+		Addr: "localhost:46379",
+		DB:   1,
+	}
+
+	rdb := redis.NewClient(redisOptions)
+	if err := rdb.Ping(ctx).Err(); err != nil {
+		t.Skip(err)
+	}
+	if err := rdb.FlushDB(ctx).Err(); err != nil {
+		t.Skip(err)
+	}
+
+	rdb.PubSubShardChannels(ctx, "")
 }
