@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/redis/go-redis/v9"
 
 	"github.com/mrksmt/tt8/client"
@@ -123,27 +122,4 @@ func ExampleBucketClient() { //nolint
 		case <-ticker.C:
 		}
 	}
-}
-
-func TestXxx(t *testing.T) {
-	s := "abcй"
-
-	for idx, x := range s {
-		spew.Dump(idx, x)
-	}
-
-	fmt.Println() //nolint
-
-	for idx := 0; idx < len(s); idx++ {
-		spew.Dump(s[idx])
-	}
-
-	fmt.Println()
-
-	rs := []rune(s)
-
-	for idx, x := range rs {
-		spew.Dump(idx, x)
-	}
-
 }
